@@ -4,3 +4,6 @@ struct XYZ {
     float* y;
     float* z;
 };
+
+
+

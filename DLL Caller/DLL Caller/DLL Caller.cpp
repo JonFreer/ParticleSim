@@ -12,14 +12,14 @@ int main()
     std::cout << sim_check();
     XYZ* data;
     sim_init(100, 50,5, 2, 2, 2, &data);
-    for (int i = 0; i < 100; i++) {
-        for (int j = 0; j < 50*5; j++) {
-            std::cout << "\n X:" << data[i].x[j];
-            std::cout << "\n Y:" << data[i].y[j];
-            std::cout << "\n Z:" << data[i].z[j];
-        }
-    
-    }
+    //for (int i = 0; i < 100; i++) {
+    //    for (int j = 0; j < 50*5; j++) {
+    //        std::cout << "\n X:" << data[i].x[j];
+    //        std::cout << "\n Y:" << data[i].y[j];
+    //        std::cout << "\n Z:" << data[i].z[j];
+    //    }
+    //
+    //}
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

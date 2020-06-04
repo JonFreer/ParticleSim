@@ -35,13 +35,13 @@ class Test_OT_Operator(bpy.types.Operator):
             bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=10, radius=0.05, enter_editmode=False,
             location=(data1[i].x[0]+xCenter, data1[i].z[0]+zCenter,data1[i].y[0]+yCenter))
             objs.append(bpy.context.view_layer.objects.active)
-            #bpy.context.view_layer.objects.active = SetDomain.domain
             for j in range(frames):
                 bpy.context.scene.frame_set(j)
                 objs[i].location = (data1[i].x[j*temp]+xCenter, data1[i].z[j*temp]+zCenter,data1[i].y[j*temp]+yCenter)
                 
                 bpy.ops.anim.keyframe_insert_menu(type='Location')
-
+        self.simDLL.sim_free()
+        print("freed c++ mem")
         return {"FINISHED"}
 
 # class XYZ(Structure):
