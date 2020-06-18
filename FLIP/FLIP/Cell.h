@@ -40,6 +40,7 @@ public:
 	Vector Velocity;
 	Vector TempVelocity;
 	int index;
+	int density;
 
 	
 };

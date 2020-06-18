@@ -24,12 +24,12 @@ bl_info = {
 
 import bpy
 
-from . test_op import Test_OT_Operator ,SetDomain ,FrameProps
+from . test_op import Test_OT_Operator ,SetDomain ,FrameProps , FLUID_OT_Operator
 
 from . test_panel import Sim_PT_Panel
 
 
-classes = (Test_OT_Operator,Sim_PT_Panel,SetDomain,FrameProps)
+classes = (Test_OT_Operator,Sim_PT_Panel,SetDomain,FrameProps, FLUID_OT_Operator)
 reg,unreg = bpy.utils.register_classes_factory(classes)
 
 def register():

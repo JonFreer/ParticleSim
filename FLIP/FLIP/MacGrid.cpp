@@ -1,32 +1,41 @@
 #include <MacGrid.h>
 #include <Cell.h>
 #include <iostream>
+#include <assert.h>
 using namespace std;
 
 void MacGrid::update(Particle* particles, int count) {
 	//set layer of all cells to -1
 	for (auto i = htmap.begin(); i != htmap.end(); i++) {
-	
 		i->second.layer = -1;
 	}
 
 	//update cells that currently have fluid in them
 	for (unsigned int i = 0; i < count; i++) {
-		if (htmap.find(getHashFunc(particles[i].x, particles[i].y, particles[i].z)) == htmap.end()) { // if cell does not exist
-			if (int(particles[i].x / _DELTA_X) < _SIZE_X && int(particles[i].y / _DELTA_Y) < _SIZE_Y && int(particles[i].z / _DELTA_Z) < _SIZE_Z && particles[i].x >= 0 && particles[i].y >= 0 && particles[i].z >=0) { // if p or c within sim bounds // THIS IS WRONG
-				
-				htmap[getHashFunc(particles[i].x, particles[i].y, particles[i].z)] = Cell(FLUID, 0, int(particles[i].x / _DELTA_X), int(particles[i].y / _DELTA_Y), int(particles[i].z / _DELTA_Z));
+		if (int(particles[i].x / _DELTA_X) < _SIZE_X && int(particles[i].y / _DELTA_X) < _SIZE_Y && int(particles[i].z / _DELTA_X) < _SIZE_Z && particles[i].x >= 0 && particles[i].y >= 0 && particles[i].z >= 0) {
+			if (htmap.find(getHashFuncParticles(particles[i].x, particles[i].y, particles[i].z)) == htmap.end()) { // if cell does not exist
+				// if p or c within sim bounds // THIS IS WRONG
+				assert(particles[i].z > 0);
+				htmap[getHashFuncParticles(particles[i].x, particles[i].y, particles[i].z)] = Cell(FLUID, 0, int(particles[i].x / _DELTA_X), int(particles[i].y / _DELTA_X), int(particles[i].z / _DELTA_X));
+
 			}
-		}
-		else { //should check for if object solid but has not current concept of solids
-			Cell* c = &htmap[getHashFunc(particles[i].x, particles[i].y, particles[i].z)];
-			c->cellType = FLUID;
-			c->layer = 0;
+			else { //should check for if object solid but has not current concept of solids
+
+				Cell* c = getCell(getHashFuncParticles(particles[i].x, particles[i].y, particles[i].z));
+				if (c->cellType != SOLID) { //cant overwrite solids
+					assert(c->x == int(particles[i].x / _DELTA_X) && c->y == int(particles[i].y / _DELTA_X) && c->z == int(particles[i].z / _DELTA_X));
+					c->cellType = FLUID;
+					c->layer = 0;
+				}
+
+			}
 		}
 	}
 
 	//create buffer zone around fluid
-	for (unsigned int i = 1; i < 2; i++) { //2 is user defined constant
+
+
+	for (unsigned int i = 1; i < 3; i++) { //2 is user defined constant
 		for (std::pair<int, Cell> element : htmap) { //for each cell
 			if ((element.second.cellType == AIR || element.second.cellType == FLUID) && element.second.layer == i - 1) {
 				updateBuffer(element.second.x - 1, element.second.y, element.second.z, i);
@@ -38,9 +47,9 @@ void MacGrid::update(Particle* particles, int count) {
 			}
 		}
 	}
-
-	for (auto i = htmap.begin(); i != htmap.end();) {
 	
+	for (auto i = htmap.begin(); i != htmap.end();) {
+		i->second.density = 0;
 		if (i->second.layer == -1) {
 			htmap.erase(i++);
 		}
@@ -52,9 +61,16 @@ void MacGrid::update(Particle* particles, int count) {
 
 }
 
+void MacGrid::validCells() {
+	for (auto i = htmap.begin(); i !=htmap.end(); i++) {
+		assert(i->second.x > - 5);
+	}
+}
+
 void MacGrid::updateBuffer(int x, int y, int z ,int i) {
 	if (htmap.find(getHashFunc(x,y,z)) != htmap.end()) { // if n exisits
-		Cell* c = &htmap[getHashFunc(x, y,z)];
+		Cell* c = getCell(x, y,z);
+		assert(c->x == x && c->y == y && c->z == z);
 		if (c->layer == -1){
 			if (c->cellType != SOLID) {
 				c->cellType = AIR;
@@ -87,6 +103,15 @@ void MacGrid::print() {
 Cell* MacGrid::getCell(int x, int y, int z) {
 	return &htmap[getHashFunc(x, y, z)];
 }
+
+Cell* MacGrid::getCell(int f) {
+	return &htmap[f];
+}
+
+bool MacGrid::cellCheck(int f) {
+	return htmap.find(f) != htmap.end();
+}
+
 
 bool MacGrid::cellCheck(int x, int y, int z) {
 	return htmap.find(getHashFunc(x, y, z)) != htmap.end();
