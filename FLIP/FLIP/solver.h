@@ -30,7 +30,9 @@ public:
 
 private:
 	void _resetExtraoplatedFluidVelocities();
-
+	bool _checkBorderFLUIDX(int x, int y, int z);
+	bool _checkBorderFLUIDY(int x, int y, int z);
+	bool _checkBorderFLUIDZ(int x, int y, int z);
 
 
 

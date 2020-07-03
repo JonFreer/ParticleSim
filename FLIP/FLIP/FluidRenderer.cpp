@@ -23,8 +23,13 @@ void FluidRenderer::drawVelocitites(int frame, int interval) {
         glColor3f(1, 1, 0.2);
 
 
-        glVertex3f(cells[frame * interval + i].x+fs->grid._DELTA_X, cells[frame * interval + i].z + h / 2, cells[frame * interval + i].y + h / 2);
-        glVertex3f(cells[frame * interval + i].x+fs->grid._DELTA_X + 1* cells[frame * interval + i].Velocity.x, cells[frame * interval + i].z + h / 2, cells[frame * interval + i].y + h / 2);
+        glVertex3f((cells[frame * interval + i].x*h+fs->grid._DELTA_X), 
+            cells[frame * interval + i].z *h + h / 2,
+            cells[frame * interval + i].y *h+ h / 2);
+
+        glVertex3f(cells[frame * interval + i].x*h+fs->grid._DELTA_X + 1* cells[frame * interval + i].Velocity.x*h,
+            cells[frame * interval + i].z *h + h / 2,
+            cells[frame * interval + i].y *h + h / 2);
 
         glVertex3f(cells[frame * interval + i].x + h/2, cells[frame * interval + i].z + fs->grid._DELTA_X, cells[frame * interval + i].y + h / 2);
         glVertex3f(cells[frame * interval + i].x + h / 2, cells[frame * interval + i].z + fs->grid._DELTA_X  + cells[frame * interval + i].Velocity.z, cells[frame * interval + i].y + h / 2);

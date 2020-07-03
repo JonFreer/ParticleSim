@@ -34,7 +34,7 @@
             //grid.validCells();
             applyGravity(delta_t);
             //grid.validCells();
-            //applyViscoity(1, delta_t);
+            applyViscoity(1, delta_t);
             //grid.validCells();
             pressureSolve(delta_t);
             //grid.validCells();
@@ -257,63 +257,283 @@
     }
 
     void Solver::applyViscoity(float viscosity, float delta_t) {
+
         for (auto i = grid.htmap.begin(); i != grid.htmap.end(); i++) {
-            if (i->second.cellType == FLUID) { //all fluid cells should have neighbours
+            if (i->second.cellType == FLUID || i->second.cellType ==AIR) {
+                i->second.TempVelocity.x = i->second.Velocity.x;
+                i->second.TempVelocity.y = i->second.Velocity.y;
+                i->second.TempVelocity.z = i->second.Velocity.z;
+            }
+        }
+
+        for (auto i = grid.htmap.begin(); i != grid.htmap.end(); i++) {
+            //if (i->second.cellType == FLUID) { //all fluid cells should have neighbours
+            //    float tempX = 0;
+            //    float tempY = 0;
+            //    float tempZ = 0;
+            //    Cell* c = grid.getCell(i->second.x + 1, i->second.y, i->second.z);
+            //    if (c->cellType == FLUID) { // if +1 is fluid
+            //        tempX = tempX + c->Velocity.x - i->second.Velocity.x;
+            //        tempY = tempY + c->Velocity.y - i->second.Velocity.y;
+            //        tempZ = tempZ + c->Velocity.z - i->second.Velocity.z;
+
+            //    }else if (grid.cellCheck(i->second.x + 2, i->second.y, i->second.z)) { // + 2 is fluid
+            //        Cell* t = grid.getCell(i->second.x + 2, i->second.y, i->second.z);
+            //        if (t->cellType == FLUID) {
+            //            tempX = tempX + c->Velocity.x - i->second.Velocity.x;
+            //            tempY = tempY + c->Velocity.y - i->second.Velocity.y;
+            //            tempZ = tempZ + c->Velocity.z - i->second.Velocity.z;
+            //        }
+            //    }
+
+
+            //    c = grid.getCell(i->second.x, i->second.y+1, i->second.z);
+
+            //    if (c->cellType == FLUID) { // if +1 is fluid
+            //        tempX = tempX + c->Velocity.x - i->second.Velocity.x;
+            //        tempY = tempY + c->Velocity.y - i->second.Velocity.y;
+            //        tempZ = tempZ + c->Velocity.z - i->second.Velocity.z;
+
+            //    }
+            //    else if (grid.cellCheck(i->second.x, i->second.y+2, i->second.z)) { // + 2 is fluid
+            //        Cell* t = grid.getCell(i->second.x, i->second.y+2, i->second.z);
+            //        if (t->cellType == FLUID) {
+            //            tempX = tempX + c->Velocity.x - i->second.Velocity.x;
+            //            tempY = tempY + c->Velocity.y - i->second.Velocity.y;
+            //            tempZ = tempZ + c->Velocity.z - i->second.Velocity.z;
+            //        }
+            //    }
+
+            //    c = grid.getCell(i->second.x, i->second.y, i->second.z+1);
+
+            //    if (c->cellType == FLUID) { // if +1 is fluid
+            //        tempX = tempX + c->Velocity.x - i->second.Velocity.x;
+            //        tempY = tempY + c->Velocity.y - i->second.Velocity.y;
+            //        tempZ = tempZ + c->Velocity.z - i->second.Velocity.z;
+
+            //    }
+            //    else if (grid.cellCheck(i->second.x, i->second.y, i->second.z+2)) { // + 2 is fluid
+            //        Cell* t = grid.getCell(i->second.x, i->second.y, i->second.z+2);
+            //        if (t->cellType == FLUID) {
+            //            tempX = tempX + c->Velocity.x - i->second.Velocity.x;
+            //            tempY = tempY + c->Velocity.y - i->second.Velocity.y;
+            //            tempZ = tempZ + c->Velocity.z - i->second.Velocity.z;
+            //        }
+            //    }
+
+            //    //if FLUID
+
+            //    c = grid.getCell(i->second.x - 1, i->second.y, i->second.z);
+            //    if (c->cellType != SOLID) {
+            //        tempX = tempX + c->Velocity.x - i->second.Velocity.x;
+            //        tempY = tempY + c->Velocity.y - i->second.Velocity.y;
+            //        tempZ = tempZ + c->Velocity.z - i->second.Velocity.z;
+            //    }
+            //    c = grid.getCell(i->second.x, i->second.y - 1, i->second.z);
+            //    if (c->cellType != SOLID) {
+            //        tempX = tempX + c->Velocity.x - i->second.Velocity.x;
+            //        tempY = tempY + c->Velocity.y - i->second.Velocity.y;
+            //        tempZ = tempZ + c->Velocity.z - i->second.Velocity.z;
+            //    }
+            //
+            //    c = grid.getCell(i->second.x, i->second.y, i->second.z - 1);
+            //    if (c->cellType != SOLID) {
+            //        tempX = tempX + c->Velocity.x - i->second.Velocity.x;
+            //        tempY = tempY + c->Velocity.y - i->second.Velocity.y;
+            //        tempZ = tempZ + c->Velocity.z - i->second.Velocity.z;
+            //    }
+
+            //    i->second.TempVelocity.x = i->second.Velocity.x + (tempX * delta_t * viscosity);
+            //    i->second.TempVelocity.y = i->second.Velocity.y + (tempY * delta_t * viscosity);
+            //    i->second.TempVelocity.z = i->second.Velocity.z + (tempZ * delta_t * viscosity);
+            //}
+            if (i->second.cellType == AIR || i->second.cellType == FLUID) { //all fluid cells should have neighbours
                 float tempX = 0;
                 float tempY = 0;
                 float tempZ = 0;
-                Cell* c = grid.getCell(i->second.x + 1, i->second.y, i->second.z);
-                if (c->cellType == FLUID) {
-                    tempX = c->Velocity.x - i->second.Velocity.x;
-                    tempY = c->Velocity.y - i->second.Velocity.y;
-                    tempZ = c->Velocity.z - i->second.Velocity.z;
-                }
-                c = grid.getCell(i->second.x - 1, i->second.y, i->second.z);
-                if (c->cellType == FLUID) {
-                    tempX = c->Velocity.x - i->second.Velocity.x;
-                    tempY = c->Velocity.y - i->second.Velocity.y;
-                    tempZ = c->Velocity.z - i->second.Velocity.z;
-                }
-                c = grid.getCell(i->second.x, i->second.y + 1, i->second.z);
-                if (c->cellType == FLUID) {
-                    tempX = c->Velocity.x - i->second.Velocity.x;
-                    tempY = c->Velocity.y - i->second.Velocity.y;
-                    tempZ = c->Velocity.z - i->second.Velocity.z;
-                }
-                c = grid.getCell(i->second.x, i->second.y - 1, i->second.z);
-                if (c->cellType == FLUID) {
-                    tempX = c->Velocity.x - i->second.Velocity.x;
-                    tempY = c->Velocity.y - i->second.Velocity.y;
-                    tempZ = c->Velocity.z - i->second.Velocity.z;
-                }
-                c = grid.getCell(i->second.x, i->second.y, i->second.z + 1);
-                if (c->cellType == FLUID) {
-                    tempX = c->Velocity.x - i->second.Velocity.x;
-                    tempY = c->Velocity.y - i->second.Velocity.y;
-                    tempZ = c->Velocity.z - i->second.Velocity.z;
-                }
-                c = grid.getCell(i->second.x, i->second.y, i->second.z - 1);
-                if (c->cellType == FLUID) {
-                    tempX = c->Velocity.x - i->second.Velocity.x;
-                    tempY = c->Velocity.y - i->second.Velocity.y;
-                    tempZ = c->Velocity.z - i->second.Velocity.z;
+                bool xFluid = false;
+                bool yFluid = false;
+                bool zFluid = false;
+                if (_checkBorderFLUIDX(i->second.x, i->second.y, i->second.z)) { //if x component borderes a fluid
+
+                    if (_checkBorderFLUIDX(i->second.x+1, i->second.y, i->second.z)) {
+                        Cell* c = grid.getCell(i->second.x + 1, i->second.y, i->second.z);
+                        tempX = tempX + c->Velocity.x - i->second.Velocity.x;
+                    }
+
+                    if (_checkBorderFLUIDX(i->second.x - 1, i->second.y, i->second.z)) {
+                        Cell* c = grid.getCell(i->second.x - 1, i->second.y, i->second.z);
+                        tempX = tempX + c->Velocity.x - i->second.Velocity.x;
+                    }
+
+                    if (_checkBorderFLUIDX(i->second.x, i->second.y + 1, i->second.z)) {
+                        Cell* c = grid.getCell(i->second.x, i->second.y + 1, i->second.z);
+                        tempX = tempX + c->Velocity.x - i->second.Velocity.x;
+                    }
+
+                    if (_checkBorderFLUIDX(i->second.x, i->second.y - 1, i->second.z)) {
+                        Cell* c = grid.getCell(i->second.x, i->second.y - 1, i->second.z);
+                        tempX = tempX + c->Velocity.x - i->second.Velocity.x;
+                    }
+
+                    if (_checkBorderFLUIDX(i->second.x, i->second.y, i->second.z+1)) {
+                        Cell* c = grid.getCell(i->second.x, i->second.y, i->second.z+1);
+                        tempX = tempX + c->Velocity.x - i->second.Velocity.x;
+                    }
+
+                    if (_checkBorderFLUIDX(i->second.x, i->second.y, i->second.z-1)) {
+                        Cell* c = grid.getCell(i->second.x, i->second.y , i->second.z-1);
+                        tempX = tempX + c->Velocity.x - i->second.Velocity.x;
+                    }
+
+                    i->second.TempVelocity.x = i->second.Velocity.x + (tempX * delta_t * viscosity);
                 }
 
-                i->second.TempVelocity.x = i->second.Velocity.x + (tempX * delta_t * viscosity);
-                i->second.TempVelocity.y = i->second.Velocity.y + (tempY * delta_t * viscosity);
-                i->second.TempVelocity.z = i->second.Velocity.z + (tempZ * delta_t * viscosity);
+
+
+                if (_checkBorderFLUIDY(i->second.x, i->second.y, i->second.z)) { //if x component borderes a fluid
+
+                    if (_checkBorderFLUIDY(i->second.x + 1, i->second.y, i->second.z)) {
+                        Cell* c = grid.getCell(i->second.x + 1, i->second.y, i->second.z);
+                        tempY = tempY + c->Velocity.y - i->second.Velocity.y;
+                    }
+
+                    if (_checkBorderFLUIDY(i->second.x - 1, i->second.y, i->second.z)) {
+                        Cell* c = grid.getCell(i->second.x - 1, i->second.y, i->second.z);
+                        tempY = tempY + c->Velocity.y - i->second.Velocity.y;
+                    }
+
+                    if (_checkBorderFLUIDY(i->second.x, i->second.y + 1, i->second.z)) {
+                        Cell* c = grid.getCell(i->second.x, i->second.y + 1, i->second.z);
+                        tempY = tempY + c->Velocity.y - i->second.Velocity.y;
+                    }
+
+                    if (_checkBorderFLUIDY(i->second.x, i->second.y - 1, i->second.z)) {
+                        Cell* c = grid.getCell(i->second.x, i->second.y - 1, i->second.z);
+                        tempY = tempY + c->Velocity.y - i->second.Velocity.y;
+                    }
+
+                    if (_checkBorderFLUIDY(i->second.x, i->second.y, i->second.z + 1)) {
+                        Cell* c = grid.getCell(i->second.x, i->second.y, i->second.z + 1);
+                        tempY = tempY + c->Velocity.y - i->second.Velocity.y;
+                    }
+                        
+                    if (_checkBorderFLUIDY(i->second.x, i->second.y, i->second.z - 1)) {
+                        Cell* c = grid.getCell(i->second.x, i->second.y, i->second.z - 1);
+                        tempY = tempY + c->Velocity.y - i->second.Velocity.y;
+                    }
+
+                    i->second.TempVelocity.y = i->second.Velocity.y + (tempY * delta_t * viscosity);
+                }
+
+                if (_checkBorderFLUIDZ(i->second.x, i->second.y, i->second.z)) { //if x component borderes a fluid
+
+                    if (_checkBorderFLUIDZ(i->second.x + 1, i->second.y, i->second.z)) {
+                        Cell* c = grid.getCell(i->second.x + 1, i->second.y, i->second.z);
+                        tempZ = tempZ + c->Velocity.z - i->second.Velocity.z;
+                    }
+
+                    if (_checkBorderFLUIDZ(i->second.x - 1, i->second.y, i->second.z)) {
+                        Cell* c = grid.getCell(i->second.x - 1, i->second.y, i->second.z);
+                        tempZ = tempZ + c->Velocity.z - i->second.Velocity.z;
+                    }
+
+                    if (_checkBorderFLUIDZ(i->second.x, i->second.y + 1, i->second.z)) {
+                        Cell* c = grid.getCell(i->second.x, i->second.y + 1, i->second.z);
+                        tempZ = tempZ + c->Velocity.z - i->second.Velocity.z;
+                    }
+
+                    if (_checkBorderFLUIDZ(i->second.x, i->second.y - 1, i->second.z)) {
+                        Cell* c = grid.getCell(i->second.x, i->second.y - 1, i->second.z);
+                        tempZ = tempZ + c->Velocity.z - i->second.Velocity.z;
+                    }
+
+                    if (_checkBorderFLUIDZ(i->second.x, i->second.y, i->second.z + 1)) {
+                        Cell* c = grid.getCell(i->second.x, i->second.y, i->second.z + 1);
+                        tempZ = tempZ + c->Velocity.z - i->second.Velocity.z;
+                    }
+
+                    if (_checkBorderFLUIDZ(i->second.x, i->second.y, i->second.z - 1)) {
+                        Cell* c = grid.getCell(i->second.x, i->second.y, i->second.z - 1);
+                        tempZ = tempZ + c->Velocity.z - i->second.Velocity.z;
+                    }
+
+                    i->second.TempVelocity.z = i->second.Velocity.z + (tempZ * delta_t * viscosity);
+                }
+
 
 
             }
         }
         for (auto i = grid.htmap.begin(); i != grid.htmap.end(); i++) {
-            if (i->second.cellType == FLUID) {
+            if (i->second.cellType == FLUID || i->second.cellType == AIR) {
                 i->second.Velocity.x = i->second.TempVelocity.x;
                 i->second.Velocity.y = i->second.TempVelocity.y;
                 i->second.Velocity.z = i->second.TempVelocity.z;
             }
         }
     }
+
+    bool Solver::_checkBorderFLUIDX(int x,int y, int z) {
+        bool fluid = false;
+        if (grid.cellCheck(x, y, z)) {
+            if (grid.getCell(x, y, z)->cellType == FLUID) {
+                return true;
+            }
+            else {
+                if (grid.cellCheck(x+1, y, z)) {
+                    return grid.getCell(x + 1, y, z)->cellType == FLUID;
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        else {
+            return false;
+        }
+    }
+
+    bool Solver::_checkBorderFLUIDY(int x, int y, int z) {
+        bool fluid = false;
+        if (grid.cellCheck(x, y, z)) {
+            if (grid.getCell(x, y, z)->cellType == FLUID) {
+                return true;
+            }
+            else {
+                if (grid.cellCheck(x, y+1, z)) {
+                    return grid.getCell(x, y+1, z)->cellType == FLUID;
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        else {
+            return false;
+        }
+    }
+
+    bool Solver::_checkBorderFLUIDZ(int x, int y, int z) {
+        bool fluid = false;
+        if (grid.cellCheck(x, y, z)) {
+            if (grid.getCell(x, y, z)->cellType == FLUID) {
+                return true;
+            }
+            else {
+                if (grid.cellCheck(x, y , z + 1)) {
+                    return grid.getCell(x, y , z + 1)->cellType == FLUID;
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        else {
+            return false;
+        }
+    }
+
 
     void Solver::applyGravity(float delta_t) {
 
@@ -461,21 +681,21 @@
                     divergenceX = pressure[i->second.index] - pressure[c->index];
                 }
                 else if (i->second.cellType == AIR) {
-                   // divergenceX = pressure[i->second.index] - 1; 
+                    divergenceX = pressure[i->second.index] - 1; 
                 }
                 c = grid.getCell(i->second.x, i->second.y - 1, i->second.z);
                 if (c->cellType == FLUID) {
                     divergenceY = pressure[i->second.index] - pressure[c->index];
                 }
                 else if (i->second.cellType == AIR) {
-                   // divergenceY = pressure[i->second.index] - 1;
+                    divergenceY = pressure[i->second.index] - 1;
                 }
                 c = grid.getCell(i->second.x, i->second.y, i->second.z - 1);
                 if (c->cellType == FLUID) {
                     divergenceZ = pressure[i->second.index] - pressure[c->index];
                 }
                 else if (i->second.cellType == AIR) {
-                 //   divergenceZ = pressure[i->second.index] - 1;
+                    divergenceZ = pressure[i->second.index] - 1;
                 }
                 i->second.Velocity.x = i->second.Velocity.x - divergenceX * (delta_t / (grid._DELTA_X *i->second.density));
                 i->second.Velocity.y = i->second.Velocity.y - divergenceY * (delta_t / (grid._DELTA_X * i->second.density));
@@ -504,25 +724,15 @@
                     }
                 }
              
-               // i->second.Velocity.x = i->second.Velocity.x - divergenceX * (delta_t / grid._DELTA_X);
-                //i->second.Velocity.y = i->second.Velocity.y - divergenceY * (delta_t / grid._DELTA_X);
-               // i->second.Velocity.z = i->second.Velocity.z - divergenceZ * (delta_t / grid._DELTA_X);
+               i->second.Velocity.x = i->second.Velocity.x - divergenceX * (delta_t / grid._DELTA_X);
+               i->second.Velocity.y = i->second.Velocity.y - divergenceY * (delta_t / grid._DELTA_X);
+               i->second.Velocity.z = i->second.Velocity.z - divergenceZ * (delta_t / grid._DELTA_X);
             }
 
         }
     }
 
-    void Solver::extrapolateVelocitiesHelper(int x, int y, int z, float* sumVelocityX, float* sumVelocityY, float* sumVelocityZ, int* neighbour_count, int i) {
-        if (grid.htmap.find(grid.getHashFunc(x, y, z)) != grid.htmap.end()) { // if n exisits
-            Cell* c = grid.getCell(x, y, z);
-            if (c->layer == (i - 1)) {
-                (*neighbour_count)++;
-                *sumVelocityX = *sumVelocityX + c->Velocity.x;
-                *sumVelocityY = *sumVelocityY + c->Velocity.y;
-                *sumVelocityZ = *sumVelocityZ + c->Velocity.z;
-            }
-        }
-    }
+
 
 
     void Solver::_resetExtraoplatedFluidVelocities() {
@@ -547,8 +757,20 @@
         }
     }
 
+    void Solver::extrapolateVelocitiesHelper(int x, int y, int z, float* sumVelocityX, float* sumVelocityY, float* sumVelocityZ, int* neighbour_count, int i) {
+        if (grid.htmap.find(grid.getHashFunc(x, y, z)) != grid.htmap.end()) { // if n exisits
+            Cell* c = grid.getCell(x, y, z);
+            if (c->layer == (i - 1)) {
+                (*neighbour_count)++;
+                *sumVelocityX = *sumVelocityX + c->Velocity.x;
+                *sumVelocityY = *sumVelocityY + c->Velocity.y;
+                *sumVelocityZ = *sumVelocityZ + c->Velocity.z;
+            }
+        }
+    }
+
     void Solver::extrapolateVelocities() {
-        //_resetExtraoplatedFluidVelocities();
+       _resetExtraoplatedFluidVelocities();
         for (auto i = grid.htmap.begin(); i != grid.htmap.end(); i++) {
             if (i->second.cellType == FLUID) {
                 i->second.layer = 0;
@@ -572,26 +794,44 @@
                     extrapolateVelocitiesHelper(i->second.x, i->second.y, i->second.z + 1, &sumVelocityX, &sumVelocityY, &sumVelocityZ, &neighbour_count, x);
                     extrapolateVelocitiesHelper(i->second.x, i->second.y, i->second.z - 1, &sumVelocityX, &sumVelocityY, &sumVelocityZ, &neighbour_count, x);
                     if (neighbour_count != 0) {
-                        if (grid.cellCheck(i->second.x+1, i->second.y, i->second.z)) {
-                            if (grid.getCell(i->second.x+1, i->second.y, i->second.z)->cellType!=FLUID) {
-                                i->second.Velocity.x = sumVelocityX / neighbour_count;
-                            }
-                        }
-                        if (grid.cellCheck(i->second.x, i->second.y+1, i->second.z)) {
-                            if (grid.getCell(i->second.x, i->second.y+1, i->second.z)->cellType != FLUID) {
-                                i->second.Velocity.y = sumVelocityY / neighbour_count;
-                            }
-                        }
-                        if (grid.cellCheck(i->second.x, i->second.y, i->second.z+1)) {
-                            if (grid.getCell(i->second.x, i->second.y, i->second.z+1)->cellType != FLUID) {
-                                i->second.Velocity.z = sumVelocityZ / neighbour_count;
-                            }
-                        }
-                      
-                        i->second.Velocity.x = sumVelocityX / neighbour_count;
-                        i->second.Velocity.y = sumVelocityY / neighbour_count;
-                        i->second.Velocity.z = sumVelocityZ / neighbour_count;
+
+
+                        //if (grid.cellCheck(i->second.x+1, i->second.y, i->second.z)) {// dont extrapolate if component borders fluid
+                        //    if (grid.getCell(i->second.x+1, i->second.y, i->second.z)->cellType!=FLUID) {
+                        //        i->second.Velocity.x = sumVelocityX / neighbour_count;
+
+                        //    }
+                        //}
+                        //else {
+                        //    i->second.Velocity.x = sumVelocityX / neighbour_count;
+                        //}
+
+
+                        //if (grid.cellCheck(i->second.x, i->second.y + 1, i->second.z)) {
+                        //    if (grid.getCell(i->second.x, i->second.y + 1, i->second.z)->cellType != FLUID) {
+                        //         i->second.Velocity.y = sumVelocityY / neighbour_count;
+                        //    }
+                        //}else{
+                        //    i->second.Velocity.y = sumVelocityY / neighbour_count;
+                        //}
+
+
+                        //if (grid.cellCheck(i->second.x, i->second.y, i->second.z+1)) {
+                        //    if (grid.getCell(i->second.x, i->second.y, i->second.z+1)->cellType != FLUID) {
+                        //        i->second.Velocity.z = sumVelocityZ / neighbour_count;
+                        //    }
+                        //}
+                        //else {
+                        //    i->second.Velocity.z = sumVelocityZ / neighbour_count;
+                        //}
+
                         i->second.layer = x;
+
+
+                        i->second.Velocity.x = sumVelocityX / neighbour_count;
+                       i->second.Velocity.y = sumVelocityY / neighbour_count;
+                        i->second.Velocity.z = sumVelocityZ / neighbour_count;
+                        
                     }
                 }
             }

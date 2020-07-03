@@ -1,18 +1,14 @@
-// FLIP.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
 
 #include <iostream>
-#include <MacGrid.h>
-#include <Particle.h>
-#include <Eigen/Sparse>
 #include <chrono>
-#include <solver.h>
-#include "fluidrender.h"
+#include <fluidsimulation.h>
 #include <stdlib.h>
 #include <math.h>
 #include <iostream>
 #include <string>
-#include <Timer.h>
+#include <timer.h>
+#include <fluidrenderer.h>
+
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
@@ -39,18 +35,23 @@ float deltaY = 0.0f;
 timer t;
 int xOrigin = -1;
 int yOrigin = -1;
-float radius = 20;
+float radius = 70;
 bool boundingBox = true;
-bool solidCells = false;
-bool airCells = false;
-bool fluidCells = false;
+bool solidCells = true;
+bool airCells = true;
+bool fluidCells = true;
 bool displayParticles = true;
 bool displayVelocities = false;
 bool play = false;
 int frame = 0;
-const int FRAMES = 500;
-int particleCount = 20000; //10000
-const int CELL_COUNT = 40000;
+
+
+const int particleCount = 1000; //10000
+const int FRAMES = 300;
+const int SIZE_X = 10;
+const int SIZE_Y = 10;
+const float DX = 1;
+
 FluidRenderer fr;
 
 
@@ -70,8 +71,10 @@ void changeSize(int w, int h) {
 	// Set the viewport to be the entire window
 	glViewport(0, 0, w, h);
 
+	//gluOrtho(0.0f, w, h, 0.0f, 0.0f, 1.0f);
+	//gluOrtho2D(0.0, 900.0, 0.0, 640.0);
 	// Set the correct perspective.
-	gluPerspective(45.0f, ratio, 0.1f, 100.0f);
+	gluPerspective(10.0f, ratio, 0.1f, 100.0f);
 
 	// Get Back to the Modelview
 	glMatrixMode(GL_MODELVIEW);
@@ -79,7 +82,7 @@ void changeSize(int w, int h) {
 
 void setTitle() {
 	std::string s1 = "Frame: ";
-	std::string title = s1 + std::to_string(frame%FRAMES);
+	std::string title = s1 + std::to_string(frame % FRAMES);
 	const char* c = title.c_str();
 	glutSetWindowTitle(c);
 }
@@ -105,37 +108,34 @@ void renderScene(void) {
 	// Reset transformations
 	glLoadIdentity();
 	// Set the camera
-	gluLookAt(x+radius * lx, y+radius * ly, z+radius * lz,
+	gluLookAt(x + radius * lx, y + radius * ly, z + radius * lz,
 		x, y, z,
 		0.0f, 1.0f, 0.0f);
 
-	// Draw ground
-	//fr.drawGridBoundingBox();
-	//fr.drawGrid();
-	//fr.drawSolidCells();
+
 	if (boundingBox) {
 		fr.drawBoundingBox();
 	}
 	if (fluidCells) {
-		fr.drawCellsByType(frame % FRAMES, FLUID , 0.1, 0.1 , 1, CELL_COUNT);
+		fr.drawCellsByType(frame % FRAMES, 1, 0.1, 0.1, 1, SIZE_X * SIZE_Y);
 	}
 	if (solidCells) {
-		fr.drawCellsByType(frame % FRAMES, SOLID , 0.2 , 0.2 ,0.2, CELL_COUNT);
+		fr.drawCellsByType(frame % FRAMES, 2, 0.2, 0.2, 0.2, SIZE_X * SIZE_Y);
 	}
 	if (airCells) {
-		fr.drawCellsByType(frame % FRAMES, AIR , 0.2 ,0.5, 0.2, CELL_COUNT);
+		fr.drawCellsByType(frame % FRAMES, 0, 0.2, 0.5, 0.2, SIZE_X * SIZE_Y);
 	}
 	if (displayParticles) {
 		fr.drawParticles(frame % FRAMES);
 	}
-	if (displayVelocities) {
-		fr.drawVelocitites(frame % FRAMES, CELL_COUNT);
-	}
+	//if (displayVelocities) {
+	//	fr.drawVelocitites(frame % FRAMES, SIZE_X * SIZE_Y);
+	//}
 
 	glutSolidSphere(0.1, 5, 5);
-	
 
-	
+
+
 
 
 	glutSwapBuffers();
@@ -169,8 +169,8 @@ void processNormalKeys(unsigned char key, int xx, int yy) {
 			t.start();
 		}
 	}
-	
-	
+
+
 }
 
 
@@ -187,7 +187,7 @@ void pressKey(int key, int xx, int yy) {
 		frame++;
 	}
 
-	
+
 
 	//char *buf; 
 	//sprintf(buf, "%d", frame);
@@ -253,19 +253,19 @@ int main(int argc, char** argv) {
 
 	//FluidSimulation fs = FluidSimulation(10, 10, 10, 0.1);
 	//fs.run();
-	
-	
-	Cell* grid = (Cell*)malloc(sizeof(Cell) * CELL_COUNT * FRAMES);
-	int* cellCount = (int*)malloc(sizeof(int) * FRAMES);
-	Particle* paticleData = (Particle*)malloc(sizeof(Particle) * particleCount * FRAMES);
-	
 
-	Solver fs = Solver(particleCount,40,40,40,0.25);
-	fr = FluidRenderer(&fs, grid, cellCount, paticleData);
+
+	int* grid = (int*)malloc(sizeof(int) * SIZE_X * SIZE_Y * FRAMES);
+	
+	Particle* paticleData = (Particle*)malloc(sizeof(Particle) * particleCount * FRAMES);
+
+
+	FluidSolver fs = FluidSolver(SIZE_X,SIZE_Y,DX, particleCount);
+	fr = FluidRenderer(&fs, grid, paticleData);
 
 	fr.getCenter(&x, &y, &z);
 
-	fs.run(0.05, FRAMES, paticleData, grid, cellCount);
+	fs.run(FRAMES, paticleData, grid);
 
 	// init GLUT and create window
 	glutInit(&argc, argv);
@@ -299,6 +299,4 @@ int main(int argc, char** argv) {
 
 	return 1;
 }
-
-
 
